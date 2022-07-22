@@ -39,6 +39,7 @@ func NewTelegram(cfg *models.Config, redis *redis.Redis, database *database.DB) 
 	bot, err := tgbotapi.NewBotAPIWithClient(cfg.TelegramToken, tgbotapi.APIEndpoint, &http.Client{
 		Timeout: updateTimeout * time.Second,
 	})
+	bot.Debug = cfg.Debug
 	if err != nil {
 		b.logger.Errorf("error start telegram api with client: %v", err)
 		return nil, err
@@ -56,12 +57,4 @@ func (b *Bot) Start() {
 	for update := range b.updates {
 		go b.eventUpdates(update)
 	}
-}
-
-func (b *Bot) TwitterNotValid(id string) {
-
-}
-
-func (b *Bot) TwitterValid(id string, s string) {
-
 }

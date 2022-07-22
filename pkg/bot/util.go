@@ -2,6 +2,76 @@ package bot
 
 import tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
+func (b *Bot) TwitterNotValid(id string) {
+
+}
+
+func (b *Bot) TwitterValid(id string, s string) {
+
+}
+
+func (b *Bot) getAllChats() map[string]string {
+	rows, err := b.database.Query("SELECT name, username FROM chats")
+	defer rows.Close() // nolint: not needed
+
+	if err != nil {
+		b.logger.Errorf("error getAllChats: %v", err)
+		return nil
+	}
+
+	chats := make(map[string]string)
+	for rows.Next() {
+		var id string
+		var name string
+		if err := rows.Scan(&id, &name); err != nil {
+			b.logger.Errorf("error getAllChats: %v", err)
+			return nil
+		}
+		if name == "" {
+			continue
+		}
+		chats[id] = name
+	}
+
+	return chats
+
+}
+
+func (b *Bot) startRegister(callback *tgbotapi.CallbackQuery) {
+	msg := b.photoConfigUrl(callback.From.ID, b.cfg.URL+"/assets/images/crypto_page_main.jpg", "Подпишитесь на каналы по ссылкам ниже и нажмите \"✅ Проверить подписки\"")
+
+	channels := b.getAllChats()
+	keyboard := tgbotapi.NewInlineKeyboardMarkup()
+	for k, v := range channels {
+		keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonURL(k, "t.me/"+v),
+		))
+	}
+	keyboard.InlineKeyboard = append(keyboard.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("✅ Проверить подписки", "check_subscriptions"),
+	))
+
+	msg.ReplyMarkup = keyboard
+	_, err := b.bot.Send(msg)
+	if err != nil {
+		b.logger.Errorf("Error send message: %v", err)
+	}
+}
+
+func (b *Bot) createPoll(poll *tgbotapi.SendPollConfig) error {
+	_msg, err := b.bot.Send(poll)
+	if err != nil {
+		b.logger.Errorf("error createPoll: %v", err)
+		return err
+	}
+	_, err = b.database.Exec("INSERT INTO polls_result (id, telegram_id, poll, insert_time) VALUES (?,?,?, NOW())", _msg.Poll.ID, _msg.Chat.ID, _msg.Poll.Question)
+	if err != nil {
+		b.logger.Errorf("error createPoll: %v", err)
+		return err
+	}
+	return nil
+}
+
 func (b *Bot) photoConfigUrl(id int64, url, caption string) *tgbotapi.PhotoConfig {
 	return &tgbotapi.PhotoConfig{
 		Caption: caption,
