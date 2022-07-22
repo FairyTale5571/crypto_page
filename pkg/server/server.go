@@ -40,6 +40,8 @@ func New(cfg *models.Config, bot *bot.Bot, rdb *redis.Redis) *Router {
 }
 
 func (r *Router) Start() {
+
+	r.router.Static("/assets/", "webApp/assets/")
 	r.logger.Info("gin opened")
 
 	r.mainRouter()

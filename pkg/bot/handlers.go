@@ -16,7 +16,20 @@ func (b *Bot) eventUpdates(update tgbotapi.Update) {
 }
 
 func (b *Bot) onMessageCreate(message *tgbotapi.Message) {
+	if !b.isInDatabase(message.Chat.ID) {
+		b.insertNewUser(message.Chat.ID, message.From.UserName, message.From.FirstName, message.From.LastName)
+	}
 
+	switch message.Command() {
+	case "start":
+		b.start(message)
+		referralID := message.CommandArguments()
+		b.updateUserNames(message.Chat.ID, message.From.UserName, message.From.FirstName, message.From.LastName, referralID)
+	}
+
+	switch message.Text {
+	
+	}
 }
 
 func (b *Bot) onCallback(callback *tgbotapi.CallbackQuery) {
