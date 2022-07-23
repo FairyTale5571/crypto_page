@@ -9,14 +9,14 @@ import (
 func (b *Bot) eventUpdates(update tgbotapi.Update) {
 
 	switch {
+	case update.Poll != nil:
+		b.onPoll(update.Poll)
 	case update.MyChatMember != nil:
 		b.onMyChatMember(update.MyChatMember)
 	case update.CallbackQuery != nil:
 		b.onCallback(update.CallbackQuery)
 	case update.Message != nil:
 		b.onMessageCreate(update.Message)
-	case update.Poll != nil:
-		b.onPoll(update.Poll)
 	}
 }
 
@@ -31,6 +31,19 @@ func (b *Bot) onPoll(poll *tgbotapi.Poll) {
 		b.logger.Errorf("Error update poll result: %v", err)
 		return
 	}
+	switch poll.Question {
+	case "Как давно интересуетесь криптовалютой?":
+		b.createPolls(b.getIdFromPoll(poll.ID), "Дополнительные интересы")
+	case "Дополнительные интересы":
+		for _, v := range poll.Options {
+			if v.VoterCount > 0 {
+				b.createPolls(b.getIdFromPoll(poll.ID), v.Text)
+				return
+			}
+		}
+	default:
+		b.lastVerify(b.getIdFromPoll(poll.ID))
+	}
 }
 
 func (b *Bot) onMessageCreate(message *tgbotapi.Message) {
@@ -42,27 +55,18 @@ func (b *Bot) onMessageCreate(message *tgbotapi.Message) {
 	case "start":
 		b.start(message)
 		referralID := message.CommandArguments()
+		b.cleanWaiting(message.Chat.ID)
 		b.updateUserNames(message.Chat.ID, message.From.UserName, message.From.FirstName, message.From.LastName, referralID)
 	}
 
 	switch message.Text {
 
-	case "x":
-		poll := tgbotapi.NewPoll(message.Chat.ID, "Как давно интересуетесь криптовалютой?", "Менее 1 года", "Более 1 года", "2 и более", "5+")
-		poll.AllowsMultipleAnswers = true
-		err := b.createPoll(&poll)
-		if err != nil {
-			b.logger.Errorf("Error create poll: %v", err)
-			return
-		}
-	case "y":
-		poll := tgbotapi.NewPoll(message.Chat.ID, "Как давно интересуетесь криптовалютой?", "Менее 1 года", "Более 1 года", "2 и более", "5+")
-		poll.AllowsMultipleAnswers = false
-		err := b.createPoll(&poll)
-		if err != nil {
-			b.logger.Errorf("Error create poll: %v", err)
-			return
-		}
+	case buttonsAbout:
+		b.about(message)
+	case buttonsReferral:
+		b.referral(message)
+	default:
+		b.onHandleWait(message)
 	}
 }
 
@@ -73,6 +77,15 @@ func (b *Bot) onCallback(callback *tgbotapi.CallbackQuery) {
 	case "check_subscriptions":
 		fmt.Println("check_subscriptions")
 		b.verifyTelegram(callback)
+	case "twitter_old":
+		b.deleteMessage(callback.Message.Chat.ID, callback.Message.MessageID)
+		b.verifyTwitter(callback.From.ID)
+	case "want_yes":
+		b.wantYes(callback)
+	case "want_no":
+		b.deleteMessage(callback.Message.Chat.ID, callback.Message.MessageID)
+		b.sendMessage(callback.Message.Chat.ID, "Отлично! Регистрация завершена!")
+
 	}
 }
 
@@ -98,5 +111,19 @@ func (b *Bot) onMyChatMember(member *tgbotapi.ChatMemberUpdated) {
 			b.logger.Errorf("Error update user status: %v", err)
 			return
 		}
+	}
+}
+
+func (b *Bot) onHandleWait(message *tgbotapi.Message) {
+
+	if _, ok := waitInstagram[message.Chat.ID]; ok {
+		b.checkInstagram(message)
+		return
+	}
+
+	if _, ok := waitWhyYouCanHelp[message.Chat.ID]; ok {
+		b.finishRegistration(message.Chat.ID)
+		delete(waitWhyYouCanHelp, message.Chat.ID)
+		return
 	}
 }

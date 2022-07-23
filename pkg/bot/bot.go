@@ -1,13 +1,14 @@
 package bot
 
 import (
+	"net/http"
+	"time"
+
 	"github.com/fairytale5571/crypto_page/pkg/database"
 	"github.com/fairytale5571/crypto_page/pkg/logger"
 	"github.com/fairytale5571/crypto_page/pkg/models"
 	"github.com/fairytale5571/crypto_page/pkg/storage/redis"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"net/http"
-	"time"
 )
 
 type Bot struct {

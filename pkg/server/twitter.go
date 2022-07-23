@@ -65,7 +65,7 @@ func (r *Router) twitterHandle(c *gin.Context) {
 		ids = append(ids, idsResult.IDs...)
 		cursor = idsResult.NextCursor
 	}
-	const user001 = "1529780626689253377"
+	const user001 = "1424753918937116677"
 	for _, v := range ids {
 		if v == user001 {
 			fmt.Fprintln(c.Writer, "Nice, now you can go back to telegram")

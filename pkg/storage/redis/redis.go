@@ -23,7 +23,7 @@ func New(uri string) (*Redis, error) {
 
 	opt, err := redis.ParseURL(uri)
 	if err != nil {
-		res.logger.Fatalf("cant parse redis url %s", err.Error())
+		res.logger.Errorf("cant parse redis url %s", err.Error())
 		return nil, err
 	}
 	res.db = redis.NewClient(opt)

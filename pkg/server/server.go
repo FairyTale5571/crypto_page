@@ -22,8 +22,6 @@ type AuthConfig struct {
 	TwitterConfig *oauth.Consumer
 }
 
-const DSID = "981627353857937509"
-
 func New(cfg *models.Config, bot *bot.Bot, rdb *redis.Redis) *Router {
 	r := Router{
 		bot:    bot,

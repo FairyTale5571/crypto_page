@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/fairytale5571/crypto_page/pkg/app"
 	"log"
 	"os"
 	"os/signal"
+
+	"github.com/fairytale5571/crypto_page/pkg/app"
 )
 
 func main() {
