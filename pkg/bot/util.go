@@ -2,6 +2,7 @@ package bot
 
 import (
 	"fmt"
+
 	"github.com/fairytale5571/crypto_page/pkg/models"
 	"github.com/fairytale5571/crypto_page/pkg/storage"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
