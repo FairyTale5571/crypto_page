@@ -2,11 +2,33 @@ package bot
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/fairytale5571/crypto_page/pkg/storage"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
+
+func (b *Bot) TwitterValid(id, username string) {
+	n, _ := strconv.ParseInt(id, 10, 64)
+	if b.isAlreadyRegistered("twitter", username) {
+		b.TwitterNotValid(id)
+		return
+	}
+	err := b.redis.Set(fmt.Sprintf("twitter_id:%d", n), username, storage.UserTwitter)
+	if err != nil {
+		b.logger.Errorf("error TwitterValid: %v", err)
+		return
+	}
+	b.sendMessage(n, "Проверка подписки на Twitter прошла успешно")
+	b.verifyInstagram(n)
+}
+
+func (b *Bot) TwitterNotValid(id string) {
+	n, _ := strconv.ParseInt(id, 10, 64)
+	_ = b.sendMessage(n, "Подписка на Twitter не прошла проверку")
+	b.verifyTwitter(n)
+}
 
 func (b *Bot) verifyTelegram(message *tgbotapi.CallbackQuery) {
 	isSub, channel := b.checkTelegram(message)

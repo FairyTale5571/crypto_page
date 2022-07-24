@@ -31,12 +31,12 @@ var (
 	location, _ = time.LoadLocation("Europe/Kiev")
 )
 
-func NewTelegram(cfg *models.Config, redis *redis.Redis, database *database.DB) (*Bot, error) {
+func NewTelegram(cfg *models.Config, rdb *redis.Redis, db *database.DB) (*Bot, error) {
 
 	b := &Bot{
 		cfg:      cfg,
-		redis:    redis,
-		database: database,
+		redis:    rdb,
+		database: db,
 		logger:   logger.New("telegram"),
 	}
 	bot, err := tgbotapi.NewBotAPIWithClient(cfg.TelegramToken, tgbotapi.APIEndpoint, &http.Client{
@@ -62,7 +62,7 @@ func (b *Bot) Start() {
 	}
 }
 
-func (b *Bot) getUsers() ([]Polls, error) {
+func (b *Bot) getUsers() ([]*Polls, error) {
 	rows, err := b.database.Query("SELECT telegram_id, user_name, user_first_name, user_last_name, instagram, twitter, want_help, referred_by, registered_at FROM users")
 	defer rows.Close()
 
@@ -76,7 +76,7 @@ func (b *Bot) getUsers() ([]Polls, error) {
 		VoterCount int    `json:"voter_count"`
 	}
 
-	var users []Polls
+	var users []*Polls
 	for rows.Next() {
 		var user Polls
 		err = rows.Scan(&user.TelegramID, &user.Username, &user.FirstName, &user.LastName, &user.Instagram, &user.Twitter, &user.WantHelp, &user.ReferredBy, &user.RegisteredAt)
@@ -97,7 +97,7 @@ func (b *Bot) getUsers() ([]Polls, error) {
 
 			user.Answers = result
 		}
-		users = append(users, user)
+		users = append(users, &user)
 	}
 	return users, nil
 }
@@ -155,7 +155,7 @@ func (b *Bot) export(message *tgbotapi.Message) {
 }
 
 func (b *Bot) sendUserFile(chatID int64) {
-	f, err := os.OpenFile("users.csv", os.O_RDONLY, 0666)
+	f, err := os.OpenFile("users.csv", os.O_RDONLY, 0o666)
 	if err != nil {
 		b.logger.Errorf("error open file: %v", err)
 		return
