@@ -206,7 +206,7 @@ func (b *Bot) createPolls(id int64, i string) {
 			BaseChat: tgbotapi.BaseChat{
 				ChatID: id,
 			},
-			Question: "Вы?",
+			Question: "Чем вы занимаетесь?",
 			Options: []string{
 				"Блогер",
 				"Влогер",

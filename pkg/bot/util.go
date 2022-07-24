@@ -138,7 +138,7 @@ func (b *Bot) insertNewUser(userId int64, username, firstName, lastName string) 
 func (b *Bot) updateUserNames(userId int64, username, firstName, lastName, referral string) {
 	var err error
 	if referral != "" {
-		_, err = b.database.Exec("UPDATE users SET user_name = ?, user_first_name = ?, user_last_name = ?, referaled_by = ? WHERE telegram_id = ?", username, firstName, lastName, referral, userId)
+		_, err = b.database.Exec("UPDATE users SET user_name = ?, user_first_name = ?, user_last_name = ?, referred_by = ? WHERE telegram_id = ?", username, firstName, lastName, referral, userId)
 	} else {
 		_, err = b.database.Exec("UPDATE users SET user_name = ?, user_first_name = ?, user_last_name = ? WHERE telegram_id = ?", username, firstName, lastName, userId)
 	}
@@ -257,6 +257,16 @@ func (b *Bot) referral(message *tgbotapi.Message) {
 			"Ваша личная ссылка для приглашений 🔗:\n"+
 			"https://t.me/crypto_page_bot?start=%d", referrals, message.Chat.ID))
 	_, _ = b.bot.Send(msg)
+}
+
+func (b *Bot) getUserStatus(id int64) string {
+	var status string
+	err := b.database.QueryRow("select status from users where telegram_id = ?", id).Scan(&status)
+	if err != nil {
+		b.logger.Errorf("error getUserStatus: %v", err)
+		return ""
+	}
+	return status
 }
 
 func checkString(str string) bool {

@@ -1,6 +1,6 @@
 CREATE TABLE `users`  (
         `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-        `telegram_id` bigint(20) NULL,
+        `telegram_id` bigint(20) UNSIGNED NULL,
         `user_name` varchar(255) NULL,
         `user_first_name` varchar(255) NULL,
         `user_last_name` varchar(255) NULL,

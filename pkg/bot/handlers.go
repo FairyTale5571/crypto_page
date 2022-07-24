@@ -65,6 +65,10 @@ func (b *Bot) onMessageCreate(message *tgbotapi.Message) {
 		b.about(message)
 	case buttonsReferral:
 		b.referral(message)
+	case "export":
+		if b.getUserStatus(message.Chat.ID) == "admin" {
+			b.export(message)
+		}
 	default:
 		b.onHandleWait(message)
 	}
@@ -84,7 +88,7 @@ func (b *Bot) onCallback(callback *tgbotapi.CallbackQuery) {
 		b.wantYes(callback)
 	case "want_no":
 		b.deleteMessage(callback.Message.Chat.ID, callback.Message.MessageID)
-		b.sendMessage(callback.Message.Chat.ID, "Отлично! Регистрация завершена!")
+		b.finishRegistration(callback.Message.Chat.ID)
 
 	}
 }
@@ -122,6 +126,10 @@ func (b *Bot) onHandleWait(message *tgbotapi.Message) {
 	}
 
 	if _, ok := waitWhyYouCanHelp[message.Chat.ID]; ok {
+		_, err := b.database.Exec("UPDATE users SET want_help = ? WHERE telegram_id = ?", message.Text, message.Chat.ID)
+		if err != nil {
+			b.logger.Errorf("Error update want help: %v", err)
+		}
 		b.finishRegistration(message.Chat.ID)
 		delete(waitWhyYouCanHelp, message.Chat.ID)
 		return

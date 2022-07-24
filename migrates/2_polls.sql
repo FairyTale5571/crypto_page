@@ -1,6 +1,6 @@
 CREATE TABLE `polls_result`  (
     `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
-    `telegram_id` bigint(20) NOT NULL,
+    `telegram_id` bigint(20) UNSIGNED NOT NULL,
     `poll` varchar(255) NULL,
     `result` json NULL,
     `insert_time` datetime NULL,
