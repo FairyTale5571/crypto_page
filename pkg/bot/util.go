@@ -296,6 +296,15 @@ func (b *Bot) getUserStatus(id int64) string {
 	return status
 }
 
+func (b *Bot) isRegistered(id int64) int64 {
+	var uid int64
+	_ = b.database.QueryRow("select users.telegram_id from users where "+
+		"users.instagram is not null "+
+		"and users.twitter is not null "+
+		"and users.telegram_id = ?", id).Scan(&uid)
+	return uid
+}
+
 func checkString(str string) bool {
 	allowedCharacters := []string{
 		"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",

@@ -6,6 +6,17 @@ import (
 
 func (b *Bot) start(message *tgbotapi.Message) {
 
+	if b.isRegistered(message.Chat.ID) != 0 {
+		msg := b.photoConfigUrl(message.Chat.ID, b.cfg.URL+"/assets/images/main_date.jpg", "Вы уже зарегистрированы!")
+		msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+			tgbotapi.NewKeyboardButtonRow(
+				tgbotapi.NewKeyboardButton(buttonsAbout),
+				tgbotapi.NewKeyboardButton(buttonsReferral),
+			),
+		)
+		_, _ = b.bot.Send(msg)
+		return
+	}
 	msg := b.photoConfigUrl(message.Chat.ID, b.cfg.URL+"/assets/images/main_date.jpg", "Будь вовлечён в проект Crypto.Page! \n\n"+
 		"Случайным образом, разыграем 500 USDT☑️\n\n"+
 		"💥 Заполни анкету, выполнив все условия и стань участником розыгрыша!\n"+
