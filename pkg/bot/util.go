@@ -274,6 +274,7 @@ func (b *Bot) referral(message *tgbotapi.Message) {
 	} else {
 		involvedText = "вы учавствуете"
 	}
+	me, _ := b.bot.GetMe()
 	msg := b.photoConfigUrl(message.Chat.ID, b.cfg.URL+"/assets/images/about.jpg", fmt.Sprintf(
 		"Будь вовлечён в проект Crypto.Page!\n\n"+
 			"⚡️Имей план Б, пригласи друга и получи гарантированный приз за его победу.\n\n"+
@@ -281,7 +282,7 @@ func (b *Bot) referral(message *tgbotapi.Message) {
 			"Ваши друзья: %d 👥\n"+
 			"Для участия в розыгрыше необходимо выполнить все условия и пригласить как минимум одного друга. \n"+
 			"Ваша личная ссылка для приглашений 🔗:\n"+
-			"https://t.me/crypto_page_bot?start=%d", referrals, message.Chat.ID))
+			"https://t.me/%s?start=%d", referrals, me.String(), message.Chat.ID))
 	_, _ = b.bot.Send(msg)
 }
 
