@@ -53,12 +53,12 @@ func (db *DB) isMigrated(filename string) bool {
 
 func (db *DB) startMigrate() {
 
-	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS migrations (
-	   id int UNSIGNED NOT NULL AUTO_INCREMENT,
-	   version varchar(255) NOT NULL,
-	   time datetime NULL DEFAULT current_timestamp,
-	   PRIMARY KEY (id)
-	);`)
+	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS migrations  (
+	  id int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+	  version varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+	  time datetime NULL DEFAULT current_timestamp(),
+	  PRIMARY KEY (id) USING BTREE
+	) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;`)
 	if err != nil {
 		db.logger.Fatalf("error create migrations table: %v", err)
 		return
