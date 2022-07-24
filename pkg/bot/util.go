@@ -186,7 +186,7 @@ func (b *Bot) lastVerify(chatID int64) {
 
 func (b *Bot) wantYes(callback *tgbotapi.CallbackQuery) {
 	waitWhyYouCanHelp[callback.From.ID] = struct{}{}
-	msg := tgbotapi.NewEditMessageText(callback.Message.Chat.ID, callback.Message.MessageID, "Почему вы хотите участвовать?\nОпишите одним сообщением")
+	msg := tgbotapi.NewEditMessageText(callback.Message.Chat.ID, callback.Message.MessageID, "Опишите каким образом вы хотели бы принять участие в развитии платформы")
 	_, _ = b.bot.Send(msg)
 }
 
