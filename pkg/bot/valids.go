@@ -134,7 +134,7 @@ func (b *Bot) checkInstagram(message *tgbotapi.Message) {
 		b.sendMessage(message.Chat.ID, "Этот аккаунт уже зарегистрирован")
 		return
 	}
-	b.redis.Set(fmt.Sprintf("instagram:%d", message.Chat.ID), message.Text, storage.UserInstagram)
+	b.redis.Set(fmt.Sprintf("instagram_id:%d", message.Chat.ID), message.Text, storage.UserInstagram)
 	b.sendMessage(message.Chat.ID, "Ваша инстаграм подтвержден")
 	delete(waitInstagram, message.Chat.ID)
 	b.createPolls(message.Chat.ID, "Как давно интересуетесь криптовалютой?")

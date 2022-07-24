@@ -199,6 +199,27 @@ func (b *Bot) finishRegistration(chatID int64) {
 		),
 	)
 	_, _ = b.bot.Send(msg)
+
+	instagram, _ := b.redis.Get(fmt.Sprintf("instagram_id:%d", chatID), storage.UserInstagram)
+	b.updateRegistration(chatID, "instagram", instagram)
+
+	twit, _ := b.redis.Get(fmt.Sprintf("twitter_id:%d", chatID), storage.UserTwitter)
+	b.updateRegistration(chatID, "twitter", twit)
+
+}
+
+func (b *Bot) updateRegistration(id int64, field, data string) {
+	query := fmt.Sprintf("update users set %s = ? where telegram_id = ?", field)
+	stmt, err := b.database.Prepare(query)
+	if err != nil {
+		b.logger.Errorf("error updateRegistration: %v", err)
+		return
+	}
+	_, err = stmt.Exec(data, id)
+	if err != nil {
+		b.logger.Errorf("error updateRegistration: %v", err)
+		return
+	}
 }
 
 func (b *Bot) about(message *tgbotapi.Message) {
