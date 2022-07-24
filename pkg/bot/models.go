@@ -32,6 +32,7 @@ type User struct {
 	WantHelp     sql.NullString
 	ReferredBy   sql.NullString
 	FirstName    sql.NullString
+	TotalInvites sql.NullString
 }
 
 type Polls struct {

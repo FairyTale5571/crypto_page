@@ -63,7 +63,21 @@ func (b *Bot) Start() {
 }
 
 func (b *Bot) getUsers() ([]*Polls, error) {
-	rows, err := b.database.Query("SELECT telegram_id, user_name, user_first_name, user_last_name, instagram, twitter, want_help, referred_by, registered_at FROM users")
+	rows, err := b.database.Query(`
+		SELECT u.telegram_id,
+			   u.user_name,
+			   u.user_first_name,
+			   u.user_last_name,
+			   u.instagram,
+			   u.twitter,
+			   u.want_help,
+			   u.referred_by,
+			   (select count(*) from users us where us.referred_by = u.telegram_id and us.telegram_id != u.referred_by
+					and us.instagram is not null
+					and us.twitter is not null
+				   ) as TotalInvites,
+			   u.registered_at FROM users u
+		`)
 	defer rows.Close()
 
 	if err != nil {
@@ -79,7 +93,7 @@ func (b *Bot) getUsers() ([]*Polls, error) {
 	var users []*Polls
 	for rows.Next() {
 		var user Polls
-		err = rows.Scan(&user.TelegramID, &user.Username, &user.FirstName, &user.LastName, &user.Instagram, &user.Twitter, &user.WantHelp, &user.ReferredBy, &user.RegisteredAt)
+		err = rows.Scan(&user.TelegramID, &user.Username, &user.FirstName, &user.LastName, &user.Instagram, &user.Twitter, &user.WantHelp, &user.ReferredBy, &user.TotalInvites, &user.RegisteredAt)
 		if err != nil {
 			b.logger.Errorf("error scan users: %v", err)
 			return nil, err
@@ -148,6 +162,7 @@ func (b *Bot) export(message *tgbotapi.Message) {
 			v.Twitter.String,
 			v.WantHelp.String,
 			v.ReferredBy.String,
+			v.TotalInvites.String,
 			v.RegisteredAt.In(location).Format("15:04:05 02.01.2006"),
 		})
 	}
