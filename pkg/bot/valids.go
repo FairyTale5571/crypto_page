@@ -2,9 +2,10 @@ package bot
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/fairytale5571/crypto_page/pkg/storage"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"strings"
 )
 
 func (b *Bot) verifyTelegram(message *tgbotapi.CallbackQuery) {
@@ -18,6 +19,7 @@ func (b *Bot) verifyTelegram(message *tgbotapi.CallbackQuery) {
 		b.logger.Infof("%d is not subscriber on %s telegram", message.From.ID, err)
 		return
 	}
+	b.deleteMessage(message.Message.Chat.ID, message.Message.MessageID)
 	msg := tgbotapi.NewMessage(message.Message.Chat.ID, "Проверка пройдена")
 	_, err := b.bot.Send(msg)
 	if err != nil {
@@ -69,7 +71,7 @@ func (b *Bot) checkTelegram(message *tgbotapi.CallbackQuery) (bool, string) {
 }
 
 func (b *Bot) verifyTwitter(id int64) {
-	_msg := b.photoConfigUrl(id, b.cfg.URL+"/assets/images/crypto_page_main.jpg", "Подпишитесь на наш Twitter и нажмите  \"✅ Проверить\"")
+	_msg := b.photoConfigUrl(id, b.cfg.URL+"/assets/images/twitter.jpg", "Подпишитесь на наш Twitter и нажмите  \n\"✅ Проверить\"")
 	_msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonURL("Crypto.page", "https://twitter.com/cryptopage_web3"),
@@ -88,7 +90,7 @@ func (b *Bot) verifyTwitter(id int64) {
 }
 
 func (b *Bot) verifyInstagram(id int64) {
-	msg := tgbotapi.NewMessage(id, "Подпишитесь на наш Instagram и нажмите введите свой логин ниже")
+	msg := b.photoConfigUrl(id, b.cfg.URL+"/assets/images/instagram.jpg", "Подпишитесь на наш Instagram и введите свой логин")
 	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonURL("Подписаться", "https://www.instagram.com/cryptopage_web3"),

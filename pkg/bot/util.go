@@ -2,10 +2,11 @@ package bot
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/fairytale5571/crypto_page/pkg/models"
 	"github.com/fairytale5571/crypto_page/pkg/storage"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"strconv"
 )
 
 func (b *Bot) isAlreadyRegistered(field, data string) bool {
@@ -64,7 +65,8 @@ func (b *Bot) getAllChats() map[string]string {
 }
 
 func (b *Bot) startRegister(callback *tgbotapi.CallbackQuery) {
-	msg := b.photoConfigUrl(callback.From.ID, b.cfg.URL+"/assets/images/crypto_page_main.jpg", "Подпишитесь на каналы по ссылкам ниже и нажмите \"✅ Проверить подписки\"")
+	b.deleteMessage(callback.Message.Chat.ID, callback.Message.MessageID)
+	msg := b.photoConfigUrl(callback.From.ID, b.cfg.URL+"/assets/images/telegram.jpg", "Подпишитесь на каналы по ссылкам ниже и нажмите \n\"✅ Проверить подписки\"")
 
 	channels := b.getAllChats()
 	keyboard := tgbotapi.NewInlineKeyboardMarkup()
@@ -212,7 +214,7 @@ func (b *Bot) wantYes(callback *tgbotapi.CallbackQuery) {
 }
 
 func (b *Bot) finishRegistration(chatID int64) {
-	msg := tgbotapi.NewMessage(chatID, "Регистрация завершена!")
+	msg := tgbotapi.NewMessage(chatID, "Поздравляем 🎉 \nРегистрация завершена!\nОсталось только пригласить друга и увеличить свои шансы!\nЖми👇Реферальная программа.")
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButton(buttonsAbout),
@@ -223,7 +225,31 @@ func (b *Bot) finishRegistration(chatID int64) {
 }
 
 func (b *Bot) about(message *tgbotapi.Message) {
-	msg := b.photoConfigUrl(message.Chat.ID, b.cfg.URL+"/assets/images/about.jpg", "Будь вовлечён в проект Crypto.Page")
+	msg := b.photoConfigUrl(message.Chat.ID, b.cfg.URL+"/assets/images/crypto_page.jpg", "Crypto.Page — это децентрализованная cross-chain социальная сеть , которая поддерживает Binance Smart Chain, Ethereum, Polygon, Tron, Solana.\nПользователи платят комиссию, размер которой зависит от выбранного блокчейна, в обмен на токены PAGE за каждое действие на платформе Crypto.Page (публикация контента, оценка контента, подтверждение имени или получение статуса амбасадора).\n\n"+
+		"Весь опубликованный контент создается и остается в виде невзаимозаменяемых токенов (NFT), которые можно продавать с аукциона, передавать или сжигать при фиксации токенов PAGE. "+
+		"Создатель NFT получает процент с каждой перепродажи усилий в токенах PAGE, а также с других действий, например, по рейтингу контента. "+
+		"Из-за децентрализованного характера социальной сети только владелец контента может удалить (сжечь) опубликованный контент.")
+	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonURL("Web", "https://crypto.page"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonURL("Приложение", "https://app.crypto.page"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonURL("Официальный Твиттер", "https://twitter.com/cryptopage_web3"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonURL("Инстаграм", "https://instagram.com/cryptopage_web3"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonURL("Англоязычное комьюнити", "https://t.me/cryptopage_web3"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonURL("Русскоязычное комьюнити", "https://t.me/cryptopage_web_3"),
+		),
+	)
+
 	_, _ = b.bot.Send(msg)
 }
 
@@ -250,10 +276,11 @@ func (b *Bot) referral(message *tgbotapi.Message) {
 		involvedText = "вы учавствуете"
 	}
 	msg := b.photoConfigUrl(message.Chat.ID, b.cfg.URL+"/assets/images/about.jpg", fmt.Sprintf(
-		"Количество билетов пропорционально повышает шансы на победу.\n\n"+
+		"Будь вовлечён в проект Crypto.Page!\n\n"+
+			"⚡️Имей план Б, пригласи друга и получи гарантированный приз за его победу.\n\n"+
 			"Ваш статус: "+involvedText+"\n"+
-			"Ваши билеты: %d 🎟️\n"+
-			"Для участия в розыгрыше необходимо пригласить как минимум одного друга. "+
+			"Ваши друзья: %d 👥\n"+
+			"Для участия в розыгрыше необходимо выполнить все условия и пригласить как минимум одного друга. \n"+
 			"Ваша личная ссылка для приглашений 🔗:\n"+
 			"https://t.me/crypto_page_bot?start=%d", referrals, message.Chat.ID))
 	_, _ = b.bot.Send(msg)

@@ -23,22 +23,21 @@ func (b *Bot) cleanWaiting(id int64) {
 }
 
 type User struct {
+	RegisteredAt time.Time
 	TelegramID   string
 	Username     sql.NullString
-	FirstName    sql.NullString
 	LastName     sql.NullString
 	Instagram    sql.NullString
 	Twitter      sql.NullString
 	WantHelp     sql.NullString
 	ReferredBy   sql.NullString
-	RegisteredAt time.Time
+	FirstName    sql.NullString
 }
 
 type Polls struct {
-	User
 	QuestionOne   string
 	QuestionTwo   string
 	QuestionThree string
-
-	Answers string
+	Answers       string
+	User
 }

@@ -75,7 +75,7 @@ func (b *Bot) getUsers() ([]Polls, error) {
 		Text       string `json:"text"`
 		VoterCount int    `json:"voter_count"`
 	}
-	
+
 	var users []Polls
 	for rows.Next() {
 		var user Polls

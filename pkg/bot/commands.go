@@ -6,7 +6,10 @@ import (
 
 func (b *Bot) start(message *tgbotapi.Message) {
 
-	msg := b.photoConfigUrl(message.Chat.ID, b.cfg.URL+"/assets/images/crypto_page_main.jpg", "Crypto.Page - decentralized cross-chain social network and nft marketplace")
+	msg := b.photoConfigUrl(message.Chat.ID, b.cfg.URL+"/assets/images/about.jpg", "Будь вовлечён в проект Crypto.Page! \n\n"+
+		"Случайным образом, разыграем 500 USDT☑️\n\n"+
+		"💥Стань частью проекта! Заполни анкету, выполнив все условия и стань участником розыгрыша!\n"+
+		"⚡️Имей план Б, пригласи друга и получи гарантированный приз за его победу.")
 
 	buttons := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
