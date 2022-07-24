@@ -2,6 +2,7 @@ package bot
 
 import (
 	"encoding/csv"
+	"encoding/json"
 	"net/http"
 	"os"
 	"time"
@@ -98,18 +99,28 @@ func (b *Bot) getUsers() ([]*Polls, error) {
 			b.logger.Errorf("error scan users: %v", err)
 			return nil, err
 		}
-		polls, err := b.database.Query("SELECT result FROM polls_result WHERE telegram_id = ?", user.TelegramID)
+		polls, err := b.database.Query("SELECT poll, result FROM polls_result WHERE telegram_id = ?", user.TelegramID)
 		if err != nil {
 			b.logger.Errorf("error get polls: %v", err)
 		}
 		for polls.Next() {
+			var question string
 			var result string
-			err = polls.Scan(&result)
+
+			err = polls.Scan(&question, &result)
 			if err != nil {
 				b.logger.Errorf("error scan polls: %v", err)
 			}
-
-			user.Answers = result
+			var p []poll
+			err = json.Unmarshal([]byte(result), &p)
+			if err != nil {
+				b.logger.Errorf("error unmarshal polls: %v", err)
+			}
+			for _, v := range p {
+				if v.VoterCount > 0 {
+					user.Answers += question + "\n" + v.Text + "\n\n"
+				}
+			}
 		}
 		users = append(users, &user)
 	}
@@ -142,9 +153,7 @@ func (b *Bot) export(message *tgbotapi.Message) {
 		"Приглашен пользователем",
 		"Пригласил пользователей",
 		"Дата регистрации",
-		"Сколько в крипте",
-		"Чем занимается",
-		"Дополнительно",
+		"Опросник",
 	})
 
 	users, err := b.getUsers()
@@ -164,6 +173,7 @@ func (b *Bot) export(message *tgbotapi.Message) {
 			v.ReferredBy.String,
 			v.TotalInvites.String,
 			v.RegisteredAt.In(location).Format("15:04:05 02.01.2006"),
+			v.Answers,
 		})
 	}
 	w.Flush()
